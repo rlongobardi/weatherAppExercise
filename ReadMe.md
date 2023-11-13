@@ -9,4 +9,4 @@ F8bbd2c4154b67e214403406996bbf44
 44d972716a576f33e58ba3112e9a3cdd
 
 At a high level, your task is to create an HTTP endpoint which returns summarised weather
-information retrieved from the forecast API above.
+information retrieved from the forecast API above..
