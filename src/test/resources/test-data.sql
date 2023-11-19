@@ -1,11 +1,8 @@
 -- test-data.sql
-DELETE
-FROM api_call;
-
 -- Create the api_call table
 CREATE TABLE IF NOT EXISTS api_call
 (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    id        INTEGER PRIMARY KEY AUTO_INCREMENT,
     endpoint  TEXT NOT NULL,
     timestamp TEXT NOT NULL
 );
