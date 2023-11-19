@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+http:
+  connection:
+    timeout: 5000
+    request:
+      timeout: 5000
+  socket:
+    timeout: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+openweather:
+  api:
+    key: 91a5e3d94708c57e8248a454d817a493
+    url: https://api.openweathermap.org/data/2.5/forecast
+
+logging:
+  level:
+    org.springframework: INFO
+    com.myweather.api: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml

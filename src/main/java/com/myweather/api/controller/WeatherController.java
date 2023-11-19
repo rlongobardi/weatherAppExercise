@@ -1,43 +1,50 @@
 package com.myweather.api.controller;
 
-import com.myweather.api.exceptions.WeatherServiceException;
+import com.myweather.api.exceptions.ApiCallException;
+import com.myweather.api.exceptions.CityNotFoundException;
+import com.myweather.api.model.ApiCall;
 import com.myweather.api.model.WeatherResponse;
+import com.myweather.api.service.HistoryService;
 import com.myweather.api.service.WeatherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Slf4j
 @RestController
+@RequestMapping("/weather")
 public class WeatherController {
 
     private final WeatherService weatherService;
+    private final HistoryService historyService;
 
-    public WeatherController(WeatherService weatherService) {
+    public WeatherController(WeatherService weatherService, HistoryService historyService) {
         this.weatherService = weatherService;
+        this.historyService = historyService;
     }
 
-    @GetMapping("/weather/{city}")
-    public ResponseEntity<?> getWeather(@Valid @Size(min = 2, max = 30) @PathVariable String city) {
+    @GetMapping("/city/{city}")
+    public ResponseEntity<WeatherResponse> getWeatherByCity(@Valid @Size(min = 1, max = 100) @PathVariable String city) {
         log.info("Received request to get weather for city: {}", city);
-        try {
-            WeatherResponse weather = weatherService.getWeather(city);
-            return ResponseEntity.ok(weather);
-        } catch (WeatherServiceException e) {
-            log.error("Error in WeatherService", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        WeatherResponse weather = weatherService.getWeatherByCity(city);
+        return ResponseEntity.ok(weather);
     }
 
-    @ExceptionHandler(WeatherServiceException.class)
-    public ResponseEntity<String> handleWeatherServiceException(WeatherServiceException e) {
+    @GetMapping("/history")
+    public ResponseEntity<List<ApiCall>> getHistory(
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<ApiCall> history = historyService.getHistory(order, limit);
+        return new ResponseEntity<>(history, HttpStatus.OK);
+    }
+
+    @ExceptionHandler({ApiCallException.class, CityNotFoundException.class})
+    public ResponseEntity<String> handleApiCallAndCityNotFoundExceptions(Exception e) {
         log.error("Error in WeatherService", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
