@@ -14,12 +14,6 @@ public class HttpClientConfig {
     @Value("${http.connection.timeout}")
     private int timeout;
 
-    @Value("${http.connection.request.timeout}")
-    private int requestTimeout;
-
-    @Value("${http.socket.timeout}")
-    private int socketTimeout;
-
     @Bean
     public HttpClient httpClient() {
         return HttpClient.newBuilder()

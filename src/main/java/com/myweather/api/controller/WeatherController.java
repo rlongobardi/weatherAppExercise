@@ -29,7 +29,7 @@ public class WeatherController {
     }
 
     @GetMapping("/city/{city}")
-    public ResponseEntity<WeatherResponse> getWeatherByCity(@Valid @Size(min = 1, max = 100) @PathVariable String city) {
+    public ResponseEntity<WeatherResponse> getWeatherByCity(@Valid @Size(min = 3, max = 100) @PathVariable String city) throws Exception {
         log.info("Received request to get weather for city: {}", city);
         WeatherResponse weather = weatherService.getWeatherByCity(city);
         return ResponseEntity.ok(weather);
@@ -39,7 +39,7 @@ public class WeatherController {
     public ResponseEntity<List<ApiCall>> getHistory(
             @RequestParam(defaultValue = "asc") String order,
             @RequestParam(defaultValue = "10") int limit) {
-        List<ApiCall> history = historyService.getHistory(order, limit);
+        final List<ApiCall> history = historyService.getHistory(order, limit);
         return new ResponseEntity<>(history, HttpStatus.OK);
     }
 

@@ -5,6 +5,7 @@ import com.myweather.api.exceptions.ApiCallException;
 import com.myweather.api.exceptions.CityNotFoundException;
 import com.myweather.api.model.WeatherResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +27,12 @@ public class WeatherService {
     @Value("${openweather.api.url}")
     private String apiUrl;
 
-    private final HistoryService historyService;
-
-    public WeatherService(@Value("${openweather.api.key}") String apiKey,
-                          @Value("${openweather.api.url}") String apiUrl,
-                          HistoryService historyService) {
-        this.httpClient = HttpClient.newHttpClient();
+    @Autowired
+    public WeatherService(HttpClient httpClient, @Value("${openweather.api.key}") String apiKey,
+                          @Value("${openweather.api.url}") String apiUrl) {
+        this.httpClient = httpClient;
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
-        this.historyService = historyService;
     }
 
     public WeatherResponse getWeatherByCity(String city) {
@@ -48,7 +46,7 @@ public class WeatherService {
 
             // Check if city was not found
             if (response.statusCode() == 404) {
-                throw new CityNotFoundException("City not found: " + city);
+                throw new CityNotFoundException("city not found: " + city);
             }
 
             return parseWeatherResponse(response.body());

@@ -6,7 +6,6 @@ import com.myweather.api.model.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -24,28 +23,14 @@ public class WeatherServiceTest {
 
     @Mock
     private HttpClient httpClient;
-
     @Mock
     private HttpResponse<String> httpResponse;
 
-    @InjectMocks
     private WeatherService weatherService;
 
     @BeforeEach
     public void setUp() {
-        weatherService = new WeatherService("apiKey", "apiUrl", new HistoryService(null));
-    }
-
-    @Test
-    public void testGetWeatherByCityWhenCityIsFoundAndApiCallIsSuccessfulThenReturnWeatherResponse() throws IOException, InterruptedException {
-        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(httpResponse);
-        when(httpResponse.statusCode()).thenReturn(200);
-        when(httpResponse.body()).thenReturn("{\"cod\":\"200\",\"message\":0,\"cnt\":40,\"list\":[],\"city\":{}}");
-
-        WeatherResponse weatherResponse = weatherService.getWeatherByCity("London");
-
-        assertNotNull(weatherResponse);
-        assertEquals("200", weatherResponse.getCod());
+        weatherService = new WeatherService(httpClient, "91a5e3d94708c57e8248a454d817a443", "http://myserver-local/data/version/weather?appid=");
     }
 
     @Test
@@ -57,10 +42,21 @@ public class WeatherServiceTest {
     }
 
     @Test
-    public void testGetWeatherByCityWhenApiCallErrorThenThrowApiCallException() throws IOException, InterruptedException {
+    public void testGetWeatherByCityWhenApiCallThrowsIOExceptionThenThrowApiCallException() throws IOException, InterruptedException {
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(IOException.class);
 
-        assertThrows(ApiCallException.class, () -> weatherService.getWeatherByCity("London"));
+        assertThrows(ApiCallException.class, () -> weatherService.getWeatherByCity("AnyCity"));
     }
 
+    @Test
+    public void testGetWeatherByCityWhenApiCallIsSuccessfulThenReturnWeatherResponse() throws IOException, InterruptedException {
+        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(httpResponse);
+        when(httpResponse.statusCode()).thenReturn(200);
+        when(httpResponse.body()).thenReturn("{\"cod\":\"200\",\"message\":0,\"cnt\":40,\"list\":[],\"city\":{}}");
+
+        WeatherResponse weatherResponse = weatherService.getWeatherByCity("London");
+
+        assertNotNull(weatherResponse);
+        assertEquals("200", weatherResponse.getCod());
+    }
 }

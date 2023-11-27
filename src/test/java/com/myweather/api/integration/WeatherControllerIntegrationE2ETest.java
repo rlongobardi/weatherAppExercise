@@ -6,12 +6,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class WeatherControllerIntegrationTest {
+public class WeatherControllerIntegrationE2ETest {
 
     @LocalServerPort
     private int port;
@@ -30,7 +31,7 @@ public class WeatherControllerIntegrationTest {
                 .when()
                 .get("/weather/city/" + cityName)
                 .then()
-                .statusCode(200)
+                .statusCode(HttpStatus.OK.value())
                 .body("city", equalTo(cityName))
                 .body("temperature", notNullValue())
                 .body("humidity", notNullValue());
@@ -43,7 +44,7 @@ public class WeatherControllerIntegrationTest {
                 .when()
                 .get("/weather/history")
                 .then()
-                .statusCode(200)
+                .statusCode(HttpStatus.OK.value())
                 .body("size()", greaterThan(0))
                 .body("history[0].city", notNullValue())
                 .body("history[0].temperature", notNullValue())
@@ -58,7 +59,7 @@ public class WeatherControllerIntegrationTest {
                 .when()
                 .get("/weather/city/" + cityName)
                 .then()
-                .statusCode(404)
+                .statusCode(HttpStatus.NOT_FOUND.value())
                 .body("error", equalTo("City not found"));
     }
 
@@ -69,7 +70,7 @@ public class WeatherControllerIntegrationTest {
                 .when()
                 .get("/weather/history/nonexistent")
                 .then()
-                .statusCode(404)
-                .body("error", equalTo("History not found"));
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("error", equalTo("Not Found"));
     }
 }

@@ -12,5 +12,10 @@ spring:
     level:
       org.springframework.jdbc.core.JdbcTemplate: DEBUG
 
+openweather:
+  api:
+    key: 91a5e3d94708c57e8248a454d817a493
+    url: https://api.openweathermap.org/data/2.5/forecast
+
 server:
   port: 8080

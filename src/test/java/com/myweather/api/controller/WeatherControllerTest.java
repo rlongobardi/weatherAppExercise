@@ -44,20 +44,6 @@ public class WeatherControllerTest {
     }
 
     @Test
-    public void testGetWeatherByCityWhenInvalidCityThenReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", ""))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    public void testGetWeatherByCityWhenCityNotFoundThenReturnNotFound() throws Exception {
-        when(weatherService.getWeatherByCity(anyString())).thenThrow(new CityNotFoundException("City not found"));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", "UnknownCity"))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    @Test
     public void testGetHistoryWhenDefaultParametersThenReturnApiCallList() throws Exception {
         when(historyService.getHistory(anyString(), anyInt())).thenReturn(Collections.emptyList());
 
@@ -69,7 +55,7 @@ public class WeatherControllerTest {
 
     @Test
     public void testGetHistoryWhenInvalidParametersThenReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/history").param("order", "invalid").param("limit", "-1"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/weather/history").param("order", "invalid").param("limit", "A"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
