@@ -1,7 +1,7 @@
 package com.myweather.api.controller;
 
-import com.myweather.api.exceptions.ApiCallException;
 import com.myweather.api.exceptions.CityNotFoundException;
+import com.myweather.api.exceptions.ValidationException;
 import com.myweather.api.model.WeatherResponse;
 import com.myweather.api.service.HistoryService;
 import com.myweather.api.service.WeatherService;
@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ public class WeatherControllerTest {
 
     @Test
     public void testGetWeatherByCityWhenValidCityThenReturnWeatherResponse() throws Exception {
+        // Arrange
         WeatherResponse weatherResponse = new WeatherResponse();
         when(weatherService.getWeatherByCity(anyString())).thenReturn(weatherResponse);
 
@@ -55,23 +57,32 @@ public class WeatherControllerTest {
 
     @Test
     public void testGetHistoryWhenInvalidParametersThenReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/history").param("order", "invalid").param("limit", "A"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/weather/history")
+                        .param("order", "invalid")
+                        .param("limit", "A"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @Test
-    public void testHandleApiCallAndCityNotFoundExceptionsWhenApiCallExceptionThenReturnInternalServerError() throws Exception {
-        when(weatherService.getWeatherByCity(anyString())).thenThrow(new ApiCallException("Error calling weather API", new Exception()));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", "London"))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    @Test
+    public void testGetWeatherByCityWhenCityNotFoundThenReturnNotFoundResponse() throws Exception {
+        String nonExistentCity = "NonExistentCity";
+        when(weatherService.getWeatherByCity(nonExistentCity)).thenThrow(new CityNotFoundException("City not found: " + nonExistentCity));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", nonExistentCity))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("City not found: " + nonExistentCity));
     }
 
     @Test
-    public void testHandleApiCallAndCityNotFoundExceptionsWhenCityNotFoundExceptionThenReturnInternalServerError() throws Exception {
-        when(weatherService.getWeatherByCity(anyString())).thenThrow(new CityNotFoundException("City not found"));
+    public void testGetWeatherByCityWhenInvalidCityThenReturnBadRequestResponse() throws Exception {
+        String invalidCity = "123";
+        when(weatherService.getWeatherByCity(invalidCity)).thenThrow(new ValidationException("Invalid city name: " + invalidCity));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", "UnknownCity"))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+        mockMvc.perform(MockMvcRequestBuilders.get("/weather/city/{city}", invalidCity))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().string(containsString("Invalid city name: " + invalidCity)));
     }
 }

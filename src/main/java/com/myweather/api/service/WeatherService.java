@@ -3,6 +3,7 @@ package com.myweather.api.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myweather.api.exceptions.ApiCallException;
 import com.myweather.api.exceptions.CityNotFoundException;
+import com.myweather.api.exceptions.ValidationException;
 import com.myweather.api.model.WeatherResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.net.http.HttpResponse;
 @Service
 public class WeatherService {
 
+    private static final String VALID_CITY = "^[a-zA-Z\\s]{3,100}$";
     private final HttpClient httpClient;
 
     @Value("${openweather.api.key}")
@@ -37,6 +39,10 @@ public class WeatherService {
 
     public WeatherResponse getWeatherByCity(String city) {
         log.info("Getting weather for city: {}", city);
+
+        if (city == null || city.isEmpty() || !city.matches(VALID_CITY)) {
+            throw new ValidationException("Invalid city name: " + city);
+        }
         try {
             String url = apiUrl + apiKey + "&q=" + city;
             HttpRequest request = HttpRequest.newBuilder()
