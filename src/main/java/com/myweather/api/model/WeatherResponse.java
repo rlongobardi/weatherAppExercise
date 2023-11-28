@@ -15,7 +15,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherResponse {
     private String cod;
-    private int message;
+    private String message;
     private int cnt;
     private List<WeatherData> list;
     private City city;

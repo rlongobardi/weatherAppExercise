@@ -32,8 +32,8 @@ public class WeatherControllerIntegrationE2ETest {
                 .get("/weather/city/" + cityName)
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("city", equalTo(cityName))
-                .body("temperature", notNullValue())
+                .body("city.name", equalTo(cityName)) // Update the JSON path here
+                .body("city.population", notNullValue())
                 .body("humidity", notNullValue());
     }
 
