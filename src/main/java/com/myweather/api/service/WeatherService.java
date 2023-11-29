@@ -54,9 +54,7 @@ public class WeatherService {
                 throw new CityNotFoundException("city not found: " + city);
             }
 
-            // Construct the URL for the API call
             String url = constructWeatherApiUrl(city);
-            // Add the actual URL to the history
             historyService.addApiCall(url);
 
             return parseWeatherResponse(response.body());
