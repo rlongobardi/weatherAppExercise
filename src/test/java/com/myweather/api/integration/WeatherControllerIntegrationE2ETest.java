@@ -56,9 +56,8 @@ public class WeatherControllerIntegrationE2ETest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", greaterThan(0))
-                .body("history[0].city", notNullValue())
-                .body("history[0].temperature", notNullValue())
-                .body("history[0].humidity", notNullValue());
+                .body("history.endpoint", notNullValue())
+                .body("history.timestamp", notNullValue());
     }
 
     @Test
