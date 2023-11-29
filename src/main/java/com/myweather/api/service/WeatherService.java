@@ -48,23 +48,34 @@ public class WeatherService {
             throw new ValidationException("Invalid city name: " + city);
         }
         try {
-            String url = "%s?appid=%s&q=%s".formatted(apiUrl, apiKey, city);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .build();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            final HttpResponse<String> response = callWeatherApiClient(city);
 
             if (response.statusCode() == 404) {
                 throw new CityNotFoundException("city not found: " + city);
             }
 
-            historyService.addApiCall("getWeatherByCity");
+            // Construct the URL for the API call
+            String url = constructWeatherApiUrl(city);
+            // Add the actual URL to the history
+            historyService.addApiCall(url);
 
             return parseWeatherResponse(response.body());
         } catch (IOException | InterruptedException e) {
             log.error("Error calling weather API", e);
             throw new ApiCallException("Error calling weather API", e);
         }
+    }
+
+    private String constructWeatherApiUrl(String city) {
+        return "%s?appid=%s&q=%s".formatted(apiUrl, apiKey, city);
+    }
+
+    private HttpResponse<String> callWeatherApiClient(String city) throws IOException, InterruptedException {
+        String url = constructWeatherApiUrl(city);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private WeatherResponse parseWeatherResponse(String responseBody) {

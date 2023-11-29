@@ -17,11 +17,16 @@ public class HistoryRepository {
     }
 
     public void addApiCall(String endpoint) {
-        jdbcTemplate.update("INSERT INTO api_call (endpoint, timestamp) VALUES (?, ?)", endpoint, LocalDateTime.now());
+        String sql = "INSERT INTO api_call (endpoint, timestamp) VALUES (?, ?)";
+        jdbcTemplate.update(sql, endpoint, LocalDateTime.now());
     }
 
     public List<ApiCall> getHistory(String order, int limit) {
-        return jdbcTemplate.query("SELECT * FROM api_call ORDER BY timestamp " + order + " LIMIT " + limit,
+        if (!"ASC".equalsIgnoreCase(order) && !"DESC".equalsIgnoreCase(order)) {
+            throw new IllegalArgumentException("Invalid order parameter");
+        }
+        String sql = "SELECT * FROM api_call ORDER BY timestamp " + order + " LIMIT ?";
+        return jdbcTemplate.query(sql, new Object[]{limit},
                 (rs, rowNum) -> new ApiCall(rs.getString("endpoint"), rs.getTimestamp("timestamp").toLocalDateTime()));
     }
 }
