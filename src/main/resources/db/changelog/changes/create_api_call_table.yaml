@@ -18,3 +18,4 @@ databaseChangeLog:
               - column:
                   name: timestamp
                   type: datetime
+                  defaultValue: CURRENT_TIMESTAMP

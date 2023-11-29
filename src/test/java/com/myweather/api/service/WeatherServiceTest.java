@@ -25,12 +25,14 @@ public class WeatherServiceTest {
     private HttpClient httpClient;
     @Mock
     private HttpResponse<String> httpResponse;
+    @Mock
+    private HistoryService historyService;
 
     private WeatherService weatherService;
 
     @BeforeEach
     public void setUp() {
-        weatherService = new WeatherService(httpClient, "91a5e3d94708c57e8248a454d817a443", "http://myserver-local/data/version/weather?appid=");
+        weatherService = new WeatherService(httpClient, "91a5e3d94708c57e8248a454d817a443", "http://myserver-local/data/version/weather?appid=", historyService);
     }
 
     @Test

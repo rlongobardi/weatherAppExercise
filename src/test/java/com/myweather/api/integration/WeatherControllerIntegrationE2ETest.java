@@ -32,13 +32,23 @@ public class WeatherControllerIntegrationE2ETest {
                 .get("/weather/city/" + cityName)
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("city.name", equalTo(cityName)) // Update the JSON path here
+                .body("city.name", equalTo(cityName))
                 .body("city.population", notNullValue())
-                .body("humidity", notNullValue());
+                .body("list[0].main.humidity", notNullValue())
+                .body("list[0].main.temp", notNullValue());
     }
 
     @Test
     public void testGetHistory() {
+        String cityName = "London";
+
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/weather/city/" + cityName)
+                .then()
+                .statusCode(HttpStatus.OK.value());
+
         given()
                 .contentType(ContentType.JSON)
                 .when()
@@ -60,7 +70,7 @@ public class WeatherControllerIntegrationE2ETest {
                 .get("/weather/city/" + cityName)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("error", equalTo("City not found"));
+                .body("error", equalTo("city not found: NonExistentCity"));
     }
 
     @Test

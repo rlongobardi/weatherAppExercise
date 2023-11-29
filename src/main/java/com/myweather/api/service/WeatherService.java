@@ -30,11 +30,15 @@ public class WeatherService {
     private String apiUrl;
 
     @Autowired
+    private final HistoryService historyService;
+
+    @Autowired
     public WeatherService(HttpClient httpClient, @Value("${openweather.api.key}") String apiKey,
-                          @Value("${openweather.api.url}") String apiUrl) {
+                          @Value("${openweather.api.url}") String apiUrl, HistoryService historyService) {
         this.httpClient = httpClient;
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
+        this.historyService = historyService;
     }
 
     public WeatherResponse getWeatherByCity(String city) {
@@ -44,16 +48,17 @@ public class WeatherService {
             throw new ValidationException("Invalid city name: " + city);
         }
         try {
-            String url = apiUrl + apiKey + "&q=" + city;
+            String url = "%s?appid=%s&q=%s".formatted(apiUrl, apiKey, city);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Check if city was not found
             if (response.statusCode() == 404) {
                 throw new CityNotFoundException("city not found: " + city);
             }
+
+            historyService.addApiCall("getWeatherByCity");
 
             return parseWeatherResponse(response.body());
         } catch (IOException | InterruptedException e) {
